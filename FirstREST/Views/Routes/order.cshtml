@@ -1,0 +1,51 @@
+﻿
+
+<div class="container">
+    <div class="starter-template" ng-controller="OrderInfoCtrl">
+        <div class="page-header"> <h2>Detalhes da Encomenda {{orderInfo.numDoc}}</h2></div>
+
+        <div class="panel panel-info detalhes">
+            <div class="panel-heading"><b>Data</b></div>
+            <div class="panel-body">{{orderInfo.Data | date : 'dd/MM/yyyy'}}</div>
+            <div class="panel-heading"><b>Fornecedor</b></div>
+            <div class="panel-body">{{orderInfo.Entidade}}</div>
+        </div>
+
+        <div class="page-header"> <h4>Listagem de produtos</h4> </div>
+
+        <form name="myForm" ng-submit="submitOrder()">
+
+            <div>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Descrição</th>
+                            <th>Armazém</th>
+                            <th>Quantidade</th>
+                            <th>Quantidade recebida</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="products in orderInfo.LinhasDoc | orderBy : p.desc:reverse">
+                            <td>{{products.CodArtigo}}</td>
+                            <td>{{products.DescArtigo}}</td>
+                            <td>{{products.Armazem}}</td>
+                            <td>{{products.Quantidade}}</td>
+                            <td class="col-xs-2"> <input class="input-md form-control" name="qtdField" type="number" id="qtdFrom{{p.id}}" value="0" min="0" max="{{products.Quantidade}}" required></td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="page-header"></div>
+            <div class="pull-right">
+                <button type="submit" class="btn btn-info">Submeter Artigos</button>
+            </div>
+
+        </form>
+
+
+    </div>
+</div><!-- /.container -->
