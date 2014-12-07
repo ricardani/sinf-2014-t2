@@ -21,9 +21,9 @@ ordersApp.config(['$routeProvider',
                 templateUrl: 'partials/list_orders.html',
                 controller: 'ListOrdersCtrl'
             }).
-            when('/order/:orderID', {
+            when('/order/:numDoc', {
                 templateUrl: 'partials/order.html',
-                controller: 'OrderCtrl'
+                controller: 'OrderMainCtrl'
             }).
             otherwise({
                 redirectTo: '/login'
