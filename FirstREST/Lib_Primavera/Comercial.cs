@@ -340,7 +340,7 @@ namespace FirstREST.Lib_Primavera
 
             try
             {
-                if (PriEngine.InitializeCompany("BELAFLOR", "sa", "123456") == true)
+                if (PriEngine.InitializeCompany("BELAFLOR", "", "") == true)
                 {
                 
 
@@ -755,7 +755,7 @@ namespace FirstREST.Lib_Primavera
                 dv.Data = objListCab.Valor("DataDoc");
                 dv.TotalMerc = objListCab.Valor("TotalMerc");
                 dv.Serie = objListCab.Valor("Serie");
-                objListLin = PriEngine.Engine.Consulta("SELECT idCabecCompras, Artigo, LinhasCompras.Descricao, Quantidade, Unidade, PrecUnit, Desconto1, TotalILiquido, PrecoLiquido, Armazens.Descricao FROM LinhasCompras, Armazens WHERE idCabecCompras='" + dv.id + "' AND Armazens.Armazem = LinhasCompras.Armazem ORDER BY NumLinha");
+                objListLin = PriEngine.Engine.Consulta("SELECT idCabecCompras, Artigo, LinhasCompras.Descricao AS itemDesc, Quantidade, Unidade, PrecUnit, Desconto1, TotalILiquido, PrecoLiquido, Armazens.Descricao FROM LinhasCompras, Armazens WHERE idCabecCompras='" + dv.id + "' AND Armazens.Armazem = LinhasCompras.Armazem ORDER BY NumLinha");
                 listlindv = new List<Model.LinhaDocCompra>();
 
                 while (!objListLin.NoFim())
@@ -763,7 +763,7 @@ namespace FirstREST.Lib_Primavera
                     lindv = new Model.LinhaDocCompra();
                     lindv.IdCabecDoc = objListLin.Valor("idCabecCompras");
                     lindv.CodArtigo = objListLin.Valor("Artigo");
-                    lindv.DescArtigo = objListLin.Valor("Descricao");
+                    lindv.DescArtigo = objListLin.Valor("itemDesc");
                     lindv.Quantidade = objListLin.Valor("Quantidade");
                     lindv.Unidade = objListLin.Valor("Unidade");
                     lindv.Desconto = objListLin.Valor("Desconto1");

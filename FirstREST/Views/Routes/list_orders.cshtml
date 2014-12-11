@@ -7,9 +7,9 @@
     <h4>Pesquisa</h4>
 </div>
 <div class="input-group">
-    <input ng-model="search" type="text" class="form-control" onblur="this.focus()" autofocus>
+    <input id="search" ng-model="search" type="text" class="form-control" onblur="this.focus()" autofocus>
     <div class="input-group-btn">
-        <button type="button" class="btn btn-default">
+        <button type="button" class="btn btn-default" ng-click="clearSearch()">
             <span class="glyphicon glyphicon-remove" aria-hidden="true" style="color: red"></span>
         </button>
     </div>
@@ -89,4 +89,3 @@
         </tr>
     </tbody>
 </table>
-

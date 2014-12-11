@@ -17,8 +17,12 @@ listOrdersController.controller('ListOrdersCtrl', function ($scope, $http) {
         });
 
 
-    $scope.dateOrder = function(){
+    $scope.dateOrder = function () {
         $scope.dateASC = !$scope.dateASC;
+    }
+
+    $scope.clearSearch = function () {
+        $scope.search = '';
     }
 
 });

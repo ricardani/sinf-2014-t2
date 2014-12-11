@@ -16,11 +16,13 @@ namespace FirstREST.Controllers
             return View();
         }
 
+        //[Authorize]
         public ActionResult list_orders()
         {
             return View();
         }
 
+        //[Authorize]
         public ActionResult order()
         {
             return View();

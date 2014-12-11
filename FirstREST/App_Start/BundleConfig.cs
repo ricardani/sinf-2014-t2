@@ -49,6 +49,7 @@ namespace FirstREST
 
             bundles.Add(new ScriptBundle("~/bundles/Controllers")
             .Include(
+                "~/Scripts/js/factories/AuthHttpResponseInterceptor.js",
                 "~/Scripts/js/controllers/listOrdersController.js",
                 "~/Scripts/js/controllers/loginControllers.js",
                 "~/Scripts/js/controllers/orderControllers.js"

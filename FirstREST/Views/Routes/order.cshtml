@@ -2,7 +2,12 @@
 
 <div class="container">
     <div class="starter-template" ng-controller="OrderInfoCtrl">
-        <div class="page-header"> <h2>Detalhes da Encomenda {{orderInfo.numDoc}}</h2></div>
+
+        <a href="#/list_orders" class="btn btn-link btn-md pull-left">
+            <span class="glyphicon glyphicon-arrow-left" aria-hidden="true" style="color: blue"></span>
+        </a>
+
+        <div class="page-header"> <h2>Detalhes da Encomenda {{orderInfo.NumDoc}}</h2></div>
 
         <div class="panel panel-info detalhes">
             <div class="panel-heading"><b>Data</b></div>
