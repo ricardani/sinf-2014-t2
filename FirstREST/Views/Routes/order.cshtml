@@ -1,4 +1,7 @@
-﻿
+﻿<div class="alert alert-success alert-dismissible" role="alert" ng-if="error == 1">
+    <b>Sucesso!</b>
+    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+</div>
 
 <div class="container">
     <div class="starter-template" ng-controller="OrderInfoCtrl">
@@ -37,7 +40,7 @@
                             <td>{{products.DescArtigo}}</td>
                             <td>{{products.Armazem}}</td>
                             <td>{{products.Quantidade}}</td>
-                            <td class="col-xs-2"> <input class="input-md form-control" name="qtdField" type="number" id="qtdFrom{{p.id}}" value="0" min="0" max="{{products.Quantidade}}" required></td>
+                            <td class="col-xs-2"> <input class="input-md form-control" ng-model="products.QuantidadeRecebida" name="qtdField" type="number" id="qtdFrom{{p.id}}" value="0" min="0" max="{{products.Quantidade}}" required></td>
                         </tr>
 
                     </tbody>

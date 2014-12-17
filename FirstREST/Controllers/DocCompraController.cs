@@ -38,7 +38,7 @@ namespace FirstREST.Controllers
 
         public HttpResponseMessage Post(Lib_Primavera.Model.DocCompra dc)
         {
-            Lib_Primavera.Model.RespostaErro erro = new Lib_Primavera.Model.RespostaErro();
+            /*Lib_Primavera.Model.RespostaErro erro = new Lib_Primavera.Model.RespostaErro();
             erro = Lib_Primavera.Comercial.VGR_New(dc);
 
             if (erro.Erro == 0)
@@ -53,6 +53,35 @@ namespace FirstREST.Controllers
             else
             {
                 return Request.CreateResponse(HttpStatusCode.BadRequest);
+            }*/
+
+            if (dc == null)
+            {
+                throw new HttpResponseException(
+                        Request.CreateResponse(HttpStatusCode.NotFound));
+
+            }
+            else
+            {
+
+                Lib_Primavera.Model.RespostaErro erro = new Lib_Primavera.Model.RespostaErro();
+                //erro = Lib_Primavera.Comercial.TransformaDoc(dc);
+                //erro = Lib_Primavera.Comercial.Encomendas_ComprasNew(dc);
+                erro = Lib_Primavera.Comercial.VGR_New(dc);
+                if (erro.Erro == 0)
+                {
+                    var response = Request.CreateResponse(
+                       HttpStatusCode.Created, dc.id);
+                    string uri = Url.Link("DefaultApi", new { DocId = dc.id });
+                    response.Headers.Location = new Uri(uri);
+                    return response;
+                }
+
+                else
+                {
+                    return Request.CreateResponse(HttpStatusCode.BadRequest);
+                }
+
             }
 
         }

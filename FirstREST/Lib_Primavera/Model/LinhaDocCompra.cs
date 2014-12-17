@@ -76,6 +76,12 @@ namespace FirstREST.Lib_Primavera.Model
             set;
         }
 
+        public string ArmazemID
+        {
+            get;
+            set;
+        }
+
         public string Lote
         {
             get;
@@ -83,6 +89,18 @@ namespace FirstREST.Lib_Primavera.Model
         }
 
         public string CodBarras
+        {
+            get;
+            set;
+        }
+
+        public double QuantidadeRecebida
+        {
+            get;
+            set;
+        }
+
+        public double QuantidadeAux
         {
             get;
             set;

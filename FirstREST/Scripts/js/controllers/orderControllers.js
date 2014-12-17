@@ -6,9 +6,10 @@ var orderController = angular.module('orderController', []);
 
 orderController.controller('OrderMainCtrl', function ($scope, $routeParams) {
     $scope.numDoc = $routeParams.numDoc;
+    $scope.error = 0;
 });
 
-orderController.controller('OrderInfoCtrl', function ($scope, $http) {
+orderController.controller('OrderInfoCtrl', function ($scope, $http, $location) {
 
     $http({ url: '/api/docCompra/' + $scope.numDoc, method: 'GET' })
         .success(function (data, status, headers, config) {
@@ -20,16 +21,33 @@ orderController.controller('OrderInfoCtrl', function ($scope, $http) {
 
     $scope.submitOrder = function () {
         var tempSubmit = [], tempProduct;
-        $scope.orderInfo.LinhasDoc.forEach(function (p) {
+        /*$scope.orderInfo.LinhasDoc.forEach(function (p) {
             var qtd = $("#qtdFrom" + p.id).val();
             if (qtd != 0) {
                 tempProduct = { id: p.id, desc: p.desc, qtdReceived: qtd };
                 tempSubmit.push(tempProduct);
             }
             
-        });
+        });*/
 
-        console.log(tempSubmit);
+        $http.post(
+            '/api/docCompra',$scope.orderInfo
+        ).
+        success(function (data, status, headers, config) {
+            console.log(data);
+            if (status == "201") {
+                $location.url("/list_orders");
+            } else {
+                alert("Aconteceu um erro a ligar à base de dados! Tente mais tarde.");
+            }
+        }).
+        error(function (data) {
+            alert("Aconteceu um erro a ligar à base de dados! Tente mais tarde.")
+            console.log(data);
+        });
+        
+        
+        
     };
 
 });

@@ -326,7 +326,7 @@ namespace FirstREST.Lib_Primavera
 
 
         //------------------------------------ ENCOMENDA ---------------------
-        /*
+       
         public static Model.RespostaErro TransformaDoc(Model.DocCompra dc)
         {
 
@@ -344,11 +344,11 @@ namespace FirstREST.Lib_Primavera
                 {
                 
 
-                    objEnc = PriEngine.Engine.Comercial.Compras.Edita("000", "ECF", "2013", 3);
+                    objEnc = PriEngine.Engine.Comercial.Compras.Edita("000", "ECF", dc.Serie, dc.NumDoc);
 
                     // --- Criar os cabeçalhos da GR
                     objGR.set_Entidade(objEnc.get_Entidade());
-                    objEnc.set_Serie("2013");
+                    objEnc.set_Serie(dc.Serie);
                     objEnc.set_Tipodoc("ECF");
                     objEnc.set_TipoEntidade("F");
 
@@ -356,9 +356,15 @@ namespace FirstREST.Lib_Primavera
  
 
                     // façam p.f. o ciclo para percorrer as linhas da encomenda que pretendem copiar
+
+                    for (int i = 0; i < dc.LinhasDoc.Count; i++)
+                    {
+                        double QdeaCopiar = dc.LinhasDoc[i].QuantidadeRecebida;
+                        if (QdeaCopiar > 0)
+                            PriEngine.Engine.Comercial.Internos.CopiaLinha("C", objEnc, "C", objGR, dc.LinhasDoc[i].NumLinha, QdeaCopiar);
+                    }
                      
-                        double QdeaCopiar;
-                        PriEngine.Engine.Comercial.Internos.CopiaLinha("C", objEnc, "C", objGR, lin.NumLinha, QdeaCopiar);
+                        
                        
                         // precisamos aqui de um metodo que permita actualizar a Qde Satisfeita da linha de encomenda.  Existe em VB mas ainda não sei qual é em c#
                        
@@ -383,7 +389,7 @@ namespace FirstREST.Lib_Primavera
             }
             catch (Exception ex)
             {
-                PriEngine.Engine.DesfazTransaccao();
+                //PriEngine.Engine.DesfazTransaccao();
                 erro.Erro = 1;
                 erro.Descricao = ex.Message;
                 return erro;
@@ -392,17 +398,75 @@ namespace FirstREST.Lib_Primavera
         
         }
 
-        */
-
 
 
 
         // ------------------------ Documentos de Compra --------------------------//
 
+
+
+        public static Model.RespostaErro Encomendas_ComprasNew(Model.DocCompra dv)
+        {
+            Lib_Primavera.Model.RespostaErro erro = new Model.RespostaErro();
+            GcpBEDocumentoCompra myEnc = new GcpBEDocumentoCompra();
+
+            GcpBELinhaDocumentoCompra myLin = new GcpBELinhaDocumentoCompra();
+
+            GcpBELinhasDocumentoCompra myLinhas = new GcpBELinhasDocumentoCompra();
+
+            PreencheRelacaoCompras rl = new PreencheRelacaoCompras();
+            List<Model.LinhaDocCompra> lstlindv = new List<Model.LinhaDocCompra>();
+
+            try
+            {
+                if (PriEngine.InitializeCompany("BELAFLOR", "", "") == true)
+                {
+                    // Atribui valores ao cabecalho do doc
+                    //myEnc.set_DataDoc(dv.Data);
+                    myEnc.set_Entidade(dv.EntidadeID);
+                    myEnc.set_Serie(dv.Serie);
+                    myEnc.set_Tipodoc("VFA");
+                    myEnc.set_TipoEntidade("F");
+                    // Linhas do documento para a lista de linhas
+                    lstlindv = dv.LinhasDoc;
+                    PriEngine.Engine.Comercial.Compras.PreencheDadosRelacionados(myEnc, rl);
+                    foreach (Model.LinhaDocCompra lin in lstlindv)
+                    {
+                        PriEngine.Engine.Comercial.Compras.AdicionaLinha(myEnc, lin.CodArtigo, -lin.QuantidadeRecebida, "", "", lin.PrecoUnitario, lin.Desconto);
+                    }
+
+
+                    // PriEngine.Engine.Comercial.Compras.TransformaDocumento(
+
+                    PriEngine.Engine.IniciaTransaccao();
+                    PriEngine.Engine.Comercial.Compras.Actualiza(myEnc, "Teste");
+                    PriEngine.Engine.TerminaTransaccao();
+                    erro.Erro = 0;
+                    erro.Descricao = "Sucesso";
+                    return erro;
+                }
+                else
+                {
+                    erro.Erro = 1;
+                    erro.Descricao = "Erro ao abrir empresa";
+                    return erro;
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                PriEngine.Engine.DesfazTransaccao();
+                erro.Erro = 1;
+                erro.Descricao = ex.Message;
+                return erro;
+            }
+        }
+
+
         public static List<Model.DocCompra> VGR_List()
         {
             ErpBS objMotor = new ErpBS();
-            
             StdBELista objListCab;
             StdBELista objListLin;
             Model.DocCompra dc = new Model.DocCompra();
@@ -453,9 +517,7 @@ namespace FirstREST.Lib_Primavera
             }
             return listdc;
         }
-
-
-
+        
         public static Model.RespostaErro VGR_New(Model.DocCompra dc)
         {
             Lib_Primavera.Model.RespostaErro erro = new Model.RespostaErro();
@@ -474,19 +536,21 @@ namespace FirstREST.Lib_Primavera
                 {
                     // Atribui valores ao cabecalho do doc
                     //myEnc.set_DataDoc(dv.Data);
-                    myGR.set_Entidade(dc.Entidade);
+                    myGR.set_Entidade(dc.EntidadeID);
                     myGR.set_NumDocExterno(dc.NumDocExterno);
                     myGR.set_Serie(dc.Serie);
                     myGR.set_Tipodoc("VGR");
                     myGR.set_TipoEntidade("F");
+                    //myGR.set_TipoEntidadeEntrega("F");
+                    //myGR.set_ModoExp("01");
                     // Linhas do documento para a lista de linhas
                     lstlindv = dc.LinhasDoc;
                     PriEngine.Engine.Comercial.Compras.PreencheDadosRelacionados(myGR, rl);
                     foreach (Model.LinhaDocCompra lin in lstlindv)
                     {
-                        PriEngine.Engine.Comercial.Compras.AdicionaLinha(myGR, lin.CodArtigo, lin.Quantidade, lin.Armazem, "", lin.PrecoUnitario, lin.Desconto);
+                        if(lin.QuantidadeRecebida > 0 && lin.QuantidadeRecebida <= lin.Quantidade)
+                            PriEngine.Engine.Comercial.Compras.AdicionaLinha(myGR, lin.CodArtigo, lin.QuantidadeRecebida, lin.ArmazemID, "", lin.PrecoUnitario, lin.Desconto);
                     }
-
 
                     PriEngine.Engine.IniciaTransaccao();
                     PriEngine.Engine.Comercial.Compras.Actualiza(myGR, "Teste");
@@ -703,7 +767,10 @@ namespace FirstREST.Lib_Primavera
                     dv.Data = objListCab.Valor("DataDoc");
                     dv.TotalMerc = objListCab.Valor("TotalMerc");
                     dv.Serie = objListCab.Valor("Serie");
-                    objListLin = PriEngine.Engine.Consulta("SELECT idCabecCompras, LinhasCompras.Artigo, LinhasCompras.Descricao, LinhasCompras.Quantidade, LinhasCompras.Unidade, LinhasCompras.PrecUnit, LinhasCompras.Desconto1, LinhasCompras.TotalILiquido, LinhasCompras.PrecoLiquido, CodBarras FROM LinhasCompras, Artigo WHERE idCabecCompras='" + dv.id + "' AND Artigo.Artigo = LinhasCompras.Artigo ORDER BY NumLinha");
+                    //objListLin = PriEngine.Engine.Consulta("SELECT idCabecCompras, LinhasCompras.Artigo, LinhasCompras.Descricao, LinhasCompras.Quantidade, LinhasCompras.Unidade, LinhasCompras.PrecUnit, LinhasCompras.Desconto1, LinhasCompras.TotalILiquido, LinhasCompras.PrecoLiquido, CodBarras FROM LinhasCompras, Artigo WHERE idCabecCompras='" + dv.id + "' AND Artigo.Artigo = LinhasCompras.Artigo ORDER BY NumLinha");
+                    objListLin = PriEngine.Engine.Consulta("SELECT idCabecCompras, LinhasCompras.Descricao, CodBarras, dbo.CabecCompras.NumDoc, dbo.LinhasCompras.NumLinha, dbo.LinhasCompras.Artigo, dbo.LinhasCompras.Quantidade, dbo.LinhasComprasStatus.EstadoTrans, dbo.LinhasComprasStatus.QuantTrans, dbo.LinhasCompras.Quantidade - dbo.LinhasComprasStatus.QuantTrans AS QtdPendente " +
+                        "FROM Artigo, dbo.CabecCompras INNER JOIN dbo.LinhasCompras ON dbo.CabecCompras.Id = dbo.LinhasCompras.IdCabecCompras INNER JOIN " +
+                        "dbo.LinhasComprasStatus ON dbo.LinhasCompras.Id = dbo.LinhasComprasStatus.IdLinhasCompras WHERE idCabecCompras='" + dv.id + "' AND (dbo.CabecCompras.TipoDoc = N'ECF') AND Artigo.Artigo = LinhasCompras.Artigo AND dbo.LinhasCompras.Quantidade > dbo.LinhasComprasStatus.QuantTrans  ORDER BY NumLinha");
                     listlindv = new List<Model.LinhaDocCompra>();
 
                     while (!objListLin.NoFim())
@@ -712,12 +779,7 @@ namespace FirstREST.Lib_Primavera
                         lindv.IdCabecDoc = objListLin.Valor("idCabecCompras");
                         lindv.CodArtigo = objListLin.Valor("Artigo");
                         lindv.DescArtigo = objListLin.Valor("Descricao");
-                        lindv.Quantidade = objListLin.Valor("Quantidade");
-                        lindv.Unidade = objListLin.Valor("Unidade");
-                        lindv.Desconto = objListLin.Valor("Desconto1");
-                        lindv.PrecoUnitario = objListLin.Valor("PrecUnit");
-                        lindv.TotalILiquido = objListLin.Valor("TotalILiquido");
-                        lindv.TotalLiquido = objListLin.Valor("PrecoLiquido");
+                        lindv.Quantidade = objListLin.Valor("QtdPendente");
                         lindv.CodBarras = objListLin.Valor("CodBarras");
 
                         listlindv.Add(lindv);
@@ -746,16 +808,24 @@ namespace FirstREST.Lib_Primavera
             if (PriEngine.InitializeCompany("BELAFLOR", "", "") == true)
             {
 
-                string st = "SELECT id, Fornecedores.Nome, DataDoc, NumDoc, TotalMerc, Serie FROM CabecCompras, Fornecedores WHERE TipoDoc='ECF' AND CabecCompras.Entidade = Fornecedores.Fornecedor AND NumDoc='" + numdoc + "'";
+                string st = "SELECT id, Fornecedores.Nome, DataDoc, NumDoc, NumDocExterno, TotalMerc, Serie, Entidade FROM CabecCompras, Fornecedores WHERE TipoDoc='ECF' AND CabecCompras.Entidade = Fornecedores.Fornecedor AND NumDoc='" + numdoc + "'";
                 objListCab = PriEngine.Engine.Consulta(st);
                 dv = new Model.DocCompra();
                 dv.id = objListCab.Valor("id");
                 dv.Entidade = objListCab.Valor("Nome");
+                dv.EntidadeID = objListCab.Valor("Entidade");
                 dv.NumDoc = objListCab.Valor("NumDoc");
+                dv.NumDocExterno = objListCab.Valor("NumDocExterno");
                 dv.Data = objListCab.Valor("DataDoc");
                 dv.TotalMerc = objListCab.Valor("TotalMerc");
                 dv.Serie = objListCab.Valor("Serie");
-                objListLin = PriEngine.Engine.Consulta("SELECT idCabecCompras, Artigo, LinhasCompras.Descricao AS itemDesc, Quantidade, Unidade, PrecUnit, Desconto1, TotalILiquido, PrecoLiquido, Armazens.Descricao FROM LinhasCompras, Armazens WHERE idCabecCompras='" + dv.id + "' AND Armazens.Armazem = LinhasCompras.Armazem ORDER BY NumLinha");
+                //objListLin = PriEngine.Engine.Consulta("SELECT idCabecCompras, Artigo, NumLinha, LinhasCompras.Descricao AS itemDesc, Quantidade, Unidade, PrecUnit, Desconto1, TotalILiquido, PrecoLiquido, Armazens.Descricao FROM LinhasCompras, Armazens WHERE idCabecCompras='" + dv.id + "' AND Armazens.Armazem = LinhasCompras.Armazem ORDER BY NumLinha");
+                objListLin = PriEngine.Engine.Consulta("WITH QtdReal AS (SELECT Artigo, NumDocExterno, SUM(Quantidade) AS QtdTotal FROM dbo.LinhasCompras GROUP BY NumDocExterno, Artigo) " +
+                        "SELECT QtdReal.QtdTotal, idCabecCompras, Desconto1, PrecUnit, LinhasCompras.Descricao AS itemDesc, Armazens.Descricao,  Armazens.Armazem AS ArmazemID, CodBarras, dbo.CabecCompras.NumDoc, dbo.LinhasCompras.NumLinha, dbo.LinhasCompras.Artigo, dbo.LinhasCompras.Quantidade, dbo.LinhasComprasStatus.EstadoTrans, dbo.LinhasComprasStatus.QuantTrans, dbo.LinhasCompras.Quantidade - dbo.LinhasComprasStatus.QuantTrans AS QtdPendente  " +
+                        "FROM QtdReal, " +
+                        "Artigo, Armazens, dbo.CabecCompras INNER JOIN dbo.LinhasCompras ON dbo.CabecCompras.Id = dbo.LinhasCompras.IdCabecCompras INNER JOIN " +
+                        "dbo.LinhasComprasStatus ON dbo.LinhasCompras.Id = dbo.LinhasComprasStatus.IdLinhasCompras WHERE " + "QtdReal.NumDocExterno = LinhasCompras.NumDocExterno AND QtdReal.Artigo = LinhasCompras.Artigo AND " +
+                        "Armazens.Armazem = LinhasCompras.Armazem AND idCabecCompras='" + dv.id + "' AND (dbo.CabecCompras.TipoDoc = N'ECF') AND Artigo.Artigo = LinhasCompras.Artigo AND dbo.LinhasCompras.Quantidade > dbo.LinhasComprasStatus.QuantTrans ORDER BY NumLinha");
                 listlindv = new List<Model.LinhaDocCompra>();
 
                 while (!objListLin.NoFim())
@@ -764,13 +834,13 @@ namespace FirstREST.Lib_Primavera
                     lindv.IdCabecDoc = objListLin.Valor("idCabecCompras");
                     lindv.CodArtigo = objListLin.Valor("Artigo");
                     lindv.DescArtigo = objListLin.Valor("itemDesc");
-                    lindv.Quantidade = objListLin.Valor("Quantidade");
-                    lindv.Unidade = objListLin.Valor("Unidade");
+                    lindv.Quantidade = objListLin.Valor("QtdPendente");
+                    lindv.NumLinha = objListLin.Valor("NumLinha");
+                    lindv.Armazem = objListLin.Valor("Descricao");
+                    lindv.ArmazemID = objListLin.Valor("ArmazemID");
                     lindv.Desconto = objListLin.Valor("Desconto1");
                     lindv.PrecoUnitario = objListLin.Valor("PrecUnit");
-                    lindv.TotalILiquido = objListLin.Valor("TotalILiquido");
-                    lindv.TotalLiquido = objListLin.Valor("PrecoLiquido");
-                    lindv.Armazem = objListLin.Valor("Descricao");
+                    lindv.QuantidadeAux = objListLin.Valor("QtdTotal");
                     listlindv.Add(lindv);
                     objListLin.Seguinte();
                 }
