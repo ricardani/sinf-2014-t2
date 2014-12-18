@@ -60,6 +60,7 @@
                                     <thead>
                                         <tr>
                                             <th class="text-center">#</th>
+                                            <th class="text-center">Armazém</th>
                                             <th class="text-center">Descrição</th>
                                             <th class="text-center">Quantidade</th>
                                         </tr>
@@ -67,8 +68,9 @@
                                     <tbody class="table-lists">
                                         <tr ng-repeat="product in order.LinhasDoc">
                                             <td>{{$index+1}}</td>
+                                            <td>{{product.Armazem}}</td>
                                             <td>{{product.DescArtigo}}</td>
-                                            <td>{{product.Quantidade}}</td>
+                                            <td>{{product.QuantidadeAux}}</td>
                                         </tr>
                                     </tbody>
                                 </table>

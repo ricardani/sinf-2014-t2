@@ -28,8 +28,8 @@
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Descrição</th>
                             <th>Armazém</th>
+                            <th>Descrição</th>
                             <th>Quantidade</th>
                             <th>Quantidade recebida</th>
                         </tr>
@@ -37,10 +37,10 @@
                     <tbody>
                         <tr ng-repeat="products in orderInfo.LinhasDoc | orderBy : p.desc:reverse">
                             <td>{{products.CodArtigo}}</td>
-                            <td>{{products.DescArtigo}}</td>
                             <td>{{products.Armazem}}</td>
-                            <td>{{products.Quantidade}}</td>
-                            <td class="col-xs-2"> <input class="input-md form-control" ng-model="products.QuantidadeRecebida" name="qtdField" type="number" id="qtdFrom{{p.id}}" value="0" min="0" max="{{products.Quantidade}}" required></td>
+                            <td>{{products.DescArtigo}}</td>
+                            <td>{{products.QuantidadeAux}}</td>
+                            <td class="col-xs-2"> <input class="input-md form-control" ng-model="products.QuantidadeRecebida" name="qtdField" type="number" id="qtdFrom{{p.id}}" value="0" min="0" max="{{products.QuantidadeAux}}" required></td>
                         </tr>
 
                     </tbody>
@@ -57,3 +57,39 @@
 
     </div>
 </div><!-- /.container -->
+
+<div class="modal fade" id="SubmitSuccess" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" ng-controller="OrderInfoCtrl">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title text-center" id="myModalLabel">Operação concluida com sucesso! </h4>
+            </div>
+            <div class="modal-body">
+                <button type="button" class="btn btn-success btn-lg center-block" ng-click="returnListOrders()">
+                    Página Encomendas
+                </button>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="SubmitError" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" ng-controller="OrderInfoCtrl">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title text-center" id="myModalLabel">Operação falhou! Tente mais tarde</h4>
+            </div>
+            <div class="modal-body">
+                <button type="button" class="btn btn-danger btn-lg center-block" ng-click="returnListOrders()">
+                    Página Encomendas
+                </button>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>

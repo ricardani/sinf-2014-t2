@@ -7,6 +7,7 @@ var orderController = angular.module('orderController', []);
 orderController.controller('OrderMainCtrl', function ($scope, $routeParams) {
     $scope.numDoc = $routeParams.numDoc;
     $scope.error = 0;
+
 });
 
 orderController.controller('OrderInfoCtrl', function ($scope, $http, $location) {
@@ -21,33 +22,30 @@ orderController.controller('OrderInfoCtrl', function ($scope, $http, $location) 
 
     $scope.submitOrder = function () {
         var tempSubmit = [], tempProduct;
-        /*$scope.orderInfo.LinhasDoc.forEach(function (p) {
-            var qtd = $("#qtdFrom" + p.id).val();
-            if (qtd != 0) {
-                tempProduct = { id: p.id, desc: p.desc, qtdReceived: qtd };
-                tempSubmit.push(tempProduct);
-            }
-            
-        });*/
-
+        
         $http.post(
             '/api/docCompra',$scope.orderInfo
         ).
         success(function (data, status, headers, config) {
             console.log(data);
             if (status == "201") {
-                $location.url("/list_orders");
+                $("#SubmitSuccess").modal('show');
             } else {
-                alert("Aconteceu um erro a ligar à base de dados! Tente mais tarde.");
+                $("#SubmitError").modal('show');
             }
         }).
         error(function (data) {
-            alert("Aconteceu um erro a ligar à base de dados! Tente mais tarde.")
+            $("#SubmitError").modal('show');
             console.log(data);
         });
-        
-        
+
         
     };
+
+    $scope.returnListOrders = function () {
+        $location.url("/list_orders");
+    };
+
+    
 
 });

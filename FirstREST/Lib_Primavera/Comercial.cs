@@ -768,9 +768,17 @@ namespace FirstREST.Lib_Primavera
                     dv.TotalMerc = objListCab.Valor("TotalMerc");
                     dv.Serie = objListCab.Valor("Serie");
                     //objListLin = PriEngine.Engine.Consulta("SELECT idCabecCompras, LinhasCompras.Artigo, LinhasCompras.Descricao, LinhasCompras.Quantidade, LinhasCompras.Unidade, LinhasCompras.PrecUnit, LinhasCompras.Desconto1, LinhasCompras.TotalILiquido, LinhasCompras.PrecoLiquido, CodBarras FROM LinhasCompras, Artigo WHERE idCabecCompras='" + dv.id + "' AND Artigo.Artigo = LinhasCompras.Artigo ORDER BY NumLinha");
-                    objListLin = PriEngine.Engine.Consulta("SELECT idCabecCompras, LinhasCompras.Descricao, CodBarras, dbo.CabecCompras.NumDoc, dbo.LinhasCompras.NumLinha, dbo.LinhasCompras.Artigo, dbo.LinhasCompras.Quantidade, dbo.LinhasComprasStatus.EstadoTrans, dbo.LinhasComprasStatus.QuantTrans, dbo.LinhasCompras.Quantidade - dbo.LinhasComprasStatus.QuantTrans AS QtdPendente " +
+                    /*objListLin = PriEngine.Engine.Consulta("SELECT idCabecCompras, LinhasCompras.Descricao, CodBarras, dbo.CabecCompras.NumDoc, dbo.LinhasCompras.NumLinha, dbo.LinhasCompras.Artigo, dbo.LinhasCompras.Quantidade, dbo.LinhasComprasStatus.EstadoTrans, dbo.LinhasComprasStatus.QuantTrans, dbo.LinhasCompras.Quantidade - dbo.LinhasComprasStatus.QuantTrans AS QtdPendente " +
                         "FROM Artigo, dbo.CabecCompras INNER JOIN dbo.LinhasCompras ON dbo.CabecCompras.Id = dbo.LinhasCompras.IdCabecCompras INNER JOIN " +
                         "dbo.LinhasComprasStatus ON dbo.LinhasCompras.Id = dbo.LinhasComprasStatus.IdLinhasCompras WHERE idCabecCompras='" + dv.id + "' AND (dbo.CabecCompras.TipoDoc = N'ECF') AND Artigo.Artigo = LinhasCompras.Artigo AND dbo.LinhasCompras.Quantidade > dbo.LinhasComprasStatus.QuantTrans  ORDER BY NumLinha");
+                    */
+                    objListLin = PriEngine.Engine.Consulta("WITH QtdReal AS (SELECT Artigo, NumDocExterno, SUM(Quantidade) AS QtdTotal FROM dbo.LinhasCompras GROUP BY NumDocExterno, Artigo) " +
+                        "SELECT QtdReal.QtdTotal, idCabecCompras, Desconto1, PrecUnit, LinhasCompras.Descricao AS itemDesc, Armazens.Descricao,  Armazens.Armazem AS ArmazemID, CodBarras, dbo.CabecCompras.NumDoc, dbo.LinhasCompras.NumLinha, dbo.LinhasCompras.Artigo, dbo.LinhasCompras.Quantidade, dbo.LinhasComprasStatus.EstadoTrans, dbo.LinhasComprasStatus.QuantTrans, dbo.LinhasCompras.Quantidade - dbo.LinhasComprasStatus.QuantTrans AS QtdPendente  " +
+                        "FROM QtdReal, " +
+                        "Artigo, Armazens, dbo.CabecCompras INNER JOIN dbo.LinhasCompras ON dbo.CabecCompras.Id = dbo.LinhasCompras.IdCabecCompras INNER JOIN " +
+                        "dbo.LinhasComprasStatus ON dbo.LinhasCompras.Id = dbo.LinhasComprasStatus.IdLinhasCompras WHERE " + "QtdReal.NumDocExterno = LinhasCompras.NumDocExterno AND QtdReal.Artigo = LinhasCompras.Artigo AND " +
+                        "Armazens.Armazem = LinhasCompras.Armazem AND idCabecCompras='" + dv.id + "' AND (dbo.CabecCompras.TipoDoc = N'ECF') AND Artigo.Artigo = LinhasCompras.Artigo AND dbo.LinhasCompras.Quantidade > dbo.LinhasComprasStatus.QuantTrans AND QtdReal.QtdTotal > 0 ORDER BY NumLinha");
+                
                     listlindv = new List<Model.LinhaDocCompra>();
 
                     while (!objListLin.NoFim())
@@ -778,9 +786,11 @@ namespace FirstREST.Lib_Primavera
                         lindv = new Model.LinhaDocCompra();
                         lindv.IdCabecDoc = objListLin.Valor("idCabecCompras");
                         lindv.CodArtigo = objListLin.Valor("Artigo");
-                        lindv.DescArtigo = objListLin.Valor("Descricao");
+                        lindv.DescArtigo = objListLin.Valor("itemDesc");
                         lindv.Quantidade = objListLin.Valor("QtdPendente");
                         lindv.CodBarras = objListLin.Valor("CodBarras");
+                        lindv.QuantidadeAux = objListLin.Valor("QtdTotal");
+                        lindv.Armazem = objListLin.Valor("Descricao");
 
                         listlindv.Add(lindv);
                         objListLin.Seguinte();
@@ -825,7 +835,7 @@ namespace FirstREST.Lib_Primavera
                         "FROM QtdReal, " +
                         "Artigo, Armazens, dbo.CabecCompras INNER JOIN dbo.LinhasCompras ON dbo.CabecCompras.Id = dbo.LinhasCompras.IdCabecCompras INNER JOIN " +
                         "dbo.LinhasComprasStatus ON dbo.LinhasCompras.Id = dbo.LinhasComprasStatus.IdLinhasCompras WHERE " + "QtdReal.NumDocExterno = LinhasCompras.NumDocExterno AND QtdReal.Artigo = LinhasCompras.Artigo AND " +
-                        "Armazens.Armazem = LinhasCompras.Armazem AND idCabecCompras='" + dv.id + "' AND (dbo.CabecCompras.TipoDoc = N'ECF') AND Artigo.Artigo = LinhasCompras.Artigo AND dbo.LinhasCompras.Quantidade > dbo.LinhasComprasStatus.QuantTrans ORDER BY NumLinha");
+                        "Armazens.Armazem = LinhasCompras.Armazem AND idCabecCompras='" + dv.id + "' AND (dbo.CabecCompras.TipoDoc = N'ECF') AND Artigo.Artigo = LinhasCompras.Artigo AND dbo.LinhasCompras.Quantidade > dbo.LinhasComprasStatus.QuantTrans AND QtdReal.QtdTotal > 0 ORDER BY NumLinha");
                 listlindv = new List<Model.LinhaDocCompra>();
 
                 while (!objListLin.NoFim())
